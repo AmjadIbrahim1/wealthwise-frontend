@@ -5,8 +5,7 @@ import { supabase } from "../supabase";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
-import CryptoJS from 'crypto-js';
+import { api } from '../api';
 import Cookies from 'js-cookie';
 import { Phone } from 'lucide-react';
 import ReCAPTCHA from 'react-google-recaptcha';
@@ -180,17 +179,7 @@ const Login = (log) => {
           className: 'custom-toast',
         }
       );
-      const getCookie = Cookies.get('sessionToken');
-      const findemail = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}findmail?email=${encodeURIComponent(email)}`,
-        {
-          headers: {
-            Authorization: `Bearer ${getCookie}`,
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true,
-        }
-      );
+      const findemail = await api('findmail', { method: 'GET', params: { email } });
 
       if (findemail.message === "No user found with this email") {
         toast.dismiss();
@@ -260,19 +249,8 @@ const Login = (log) => {
           className: 'custom-toast',
         }
       );
-      const user1 = { email: email, password : password, phone : name, name : phone};
-      const getCookie = Cookies.get('sessionToken');
-      const response = await axios.post(
-        process.env.REACT_APP_BACKEND_URL + "signup",
-        user1,
-        {
-          headers: {
-            Authorization: `Bearer ${getCookie}`,
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true,
-        }
-      );
+      const user1 = { email: email, phone : name, name : phone};
+      const response = await api('signup', { body: user1 });
   
       if (response) {
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
@@ -354,9 +332,7 @@ const Login = (log) => {
  
 
     setLoading(true);
-    let encrypted="";
-    const Rtoken = await recaptchaRef.current.execute();
-    setRecaptchaToken(Rtoken);
+    setRecaptchaToken(await recaptchaRef.current.execute());
 
     try {
       const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
@@ -365,29 +341,13 @@ const Login = (log) => {
       });
       if (loginError) throw loginError;
       const user = loginData.user;
-      const ps=process.env.REACT_APP_SECRET;
-      const auth1= loginData.session.access_token;
       if (user && !user.email_confirmed_at) {
         toast.dismiss();
         toast.error('Email not verified. Please verify your email (الإيميل متفعّلش، فعّله الأول)',{position:'top-center'});
       } else {
-        try {
-          setIsLoggedIn(true);          
-          const key = CryptoJS.enc.Utf8.parse(ps.padEnd(32, ' ')); 
-          const iv = CryptoJS.enc.Utf8.parse(ps.padEnd(16, ' '));
-           const val={email1:email,auth:auth1,token1:Rtoken};
-           const valString = JSON.stringify(val);
-          encrypted = CryptoJS.AES.encrypt(valString, key, {
-              iv: iv,
-              mode: CryptoJS.mode.CBC,
-              padding: CryptoJS.pad.Pkcs7
-          }).toString();
-              
-          } catch (error) {
-              console.error('Encryption/Decryption error:', error);
-          }
-  
-        const response = await axios.post(process.env.REACT_APP_BACKEND_URL + "login", {encrypted} ,{ withCredentials: true });
+        setIsLoggedIn(true);
+
+        const response = await api('login');
         const expires = new Date();
         expires.setTime(expires.getTime() + 8 * 60 * 60 * 1000)
         settoken(response.data);
@@ -402,17 +362,7 @@ const Login = (log) => {
             log.email(email);
             clear();
 
-            const getCookie = Cookies.get('sessionToken');
-            const findemail = await axios.get(
-            `${process.env.REACT_APP_BACKEND_URL}findemail?email=${encodeURIComponent(email)}`,
-             {
-              headers: {
-                Authorization: `Bearer ${getCookie}`,
-                'Content-Type': 'application/json',
-              },
-              withCredentials: true,
-            }
-          );
+            const findemail = await api('findemail', { method: 'GET', params: { email } });
 
           findemail.data.user.count===0? navigate('/foam', { replace: true }) : navigate('/home', { replace: true })
     
@@ -510,9 +460,7 @@ const Login = (log) => {
     );
 
     setLoading(true);
-    let encrypted="";
-    const Rtoken = await recaptchaRef.current.execute();
-    setRecaptchaToken(Rtoken);
+    setRecaptchaToken(await recaptchaRef.current.execute());
     try {
       const { data: oauthData, error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -530,47 +478,17 @@ const Login = (log) => {
       const session = await waitForSupabaseSession(popup);
       const user = session.user;
 
-      const user1 = { email: user.email, password : null, phone : user.phone || null, name : user.user_metadata?.full_name || user.user_metadata?.name || null,profile : user.user_metadata?.avatar_url || null};
-      const getCookie = Cookies.get('sessionToken');
+      const user1 = { email: user.email, phone : user.phone || null, name : user.user_metadata?.full_name || user.user_metadata?.name || null,profile : user.user_metadata?.avatar_url || null};
       try{
-        await axios.post(
-          process.env.REACT_APP_BACKEND_URL + "signup",
-          user1,
-          {
-            headers: {
-              Authorization: `Bearer ${getCookie}`,
-              'Content-Type': 'application/json',
-            },
-            withCredentials: true,
-          }
-        );
+        await api('signup', { body: user1 });
       }catch(e){
         console.log(e);
       }
       setEmail(user.email)
       log.email(user.email);
       setIsLoggedIn(true);
-      const ps=process.env.REACT_APP_SECRET;
-      const auth1= session.access_token;
 
-      try {
-        setIsLoggedIn(true);
-        
-        const key = CryptoJS.enc.Utf8.parse(ps.padEnd(32, ' ')); 
-        const iv = CryptoJS.enc.Utf8.parse(ps.padEnd(16, ' '));
-         const val={email1:user.email,auth:auth1,token1:Rtoken};
-         const valString = JSON.stringify(val);
-        encrypted = CryptoJS.AES.encrypt(valString, key, {
-            iv: iv,
-            mode: CryptoJS.mode.CBC,
-            padding: CryptoJS.pad.Pkcs7
-        }).toString();
-            
-        } catch (error) {
-            console.error('Encryption/Decryption error:', error);
-        }
-
-      const response = await axios.post(process.env.REACT_APP_BACKEND_URL + "login", {encrypted} ,{ withCredentials: true });
+      const response = await api('login');
       const expires = new Date();
       expires.setTime(expires.getTime() + 8 * 60 * 60 * 1000)
       settoken(response.data);
@@ -583,17 +501,7 @@ const Login = (log) => {
       log.user1(true);
       clear();
        try{
-          const getCookie = Cookies.get('sessionToken');
-          const findemail = await axios.get(
-            `${process.env.REACT_APP_BACKEND_URL}findemail?email=${encodeURIComponent(user.email)}`,
-            {
-              headers: {
-                Authorization: `Bearer ${getCookie}`,
-                'Content-Type': 'application/json',
-              },
-              withCredentials: true,
-            }
-          );
+          const findemail = await api('findemail', { method: 'GET', params: { email: user.email } });
         findemail.data.user.count===0? navigate('/foam', { replace: true }) : navigate('/home', { replace: true })
       }catch(e){
         navigate('/foam', { replace: true })

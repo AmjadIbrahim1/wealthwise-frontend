@@ -5,7 +5,7 @@ import {
   Activity,
   X
 } from 'lucide-react';
-import axios from 'axios';
+import { api } from '../api';
 import Cookies from 'js-cookie';
 import { useNavigate } from 'react-router-dom';
 
@@ -20,17 +20,7 @@ const Navbar = ({mail}) => {
 
   const handleProfile = useCallback(async (e) => {
     try {
-      const getCookie = Cookies.get('sessionToken');
-      const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}findemail?email=${encodeURIComponent(mail)}`,
-        {
-          headers: {
-            Authorization: `Bearer ${getCookie}`,
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await api('findemail', { method: 'GET', params: { email: mail } });
       setData(response.data.user);
     } catch (error) {
       console.error('Error fetching recommendation:', error);

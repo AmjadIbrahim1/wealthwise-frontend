@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import Cookies from 'js-cookie';
+import { api } from '../api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -180,14 +179,7 @@ const Psinfo = ({ mail }) => {
     );
     
     try {
-      const getCookie = Cookies.get('sessionToken');
-      const response = await axios.post( process.env.REACT_APP_BACKEND_URL +"submitdata", { formData },{
-        headers: {
-          Authorization: `Bearer ${getCookie}`,
-          'Content-Type': 'application/json',
-        },
-        withCredentials: true,
-      });
+      const response = await api('submitdata', { body: { formData } });
       console.log(response.data);
       updateCount(); 
     } catch (error) {
@@ -222,14 +214,7 @@ const Psinfo = ({ mail }) => {
   const updateCount = async () => {
     const email = mail; 
     try {
-      const getCookie = Cookies.get('sessionToken');
-      const response = await axios.post( process.env.REACT_APP_BACKEND_URL +"updatecount", { email },{
-        headers: {
-          Authorization: `Bearer ${getCookie}`,
-          'Content-Type': 'application/json',
-        },
-        withCredentials: true,
-      });
+      const response = await api('updatecount', { body: { email } });
       console.log(response.data); 
     } catch (error) {
       console.error(error.response.data); 

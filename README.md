@@ -10,7 +10,7 @@
 [![Build](https://img.shields.io/badge/Build-Passing-brightgreen?style=for-the-badge&logo=javascript&logoColor=white)](https://github.com/AmjadIbrahim1/wealthwise-frontend)
 [![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.4-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20DB-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+[![Supabase](https://img.shields.io/badge/Supabase-Auth%20%2B%20DB%20%2B%20API-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 [![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen?style=for-the-badge&logo=github)](https://github.com/AmjadIbrahim1/wealthwise-frontend)
 
@@ -30,14 +30,14 @@
 - [🛠 Tech Stack (التقنيات المستخدمة)](#-tech-stack-التقنيات-المستخدمة)
 - [🚀 Getting Started (البداية السريعة)](#-getting-started-البداية-السريعة)
 - [🔐 Authentication (المصادقة)](#-authentication-المصادقة)
-- [🔌 Backend API (واجهة الـ API الخلفية)](#-backend-api-واجهة-الـ-api-الخلفية)
+- [🔌 Backend API — Supabase Edge Functions (الواجهة الخلفية)](#-backend-api--supabase-edge-functionsالواجهة-الخلفية)
 - [🏭 Production Deployment (نشر الإنتاج)](#-production-deployment-نشر-الإنتاج)
 - [✅ Production Readiness Checklist (قائمة جاهزية الإنتاج)](#-production-readiness-checklist-قائمة-جاهزية-الإنتاج)
 - [📁 Project Structure (هيكل المشروع)](#-project-structure-هيكل-المشروع)
 - [🔒 Security Notes (ملاحظات الأمان)](#-security-notes-ملاحظات-الأمان)
 - [🗺 Roadmap (خارطة الطريق)](#-roadmap-خارطة-الطريق)
 - [👥 Team (الفريق)](#-team-الفريق)
-- [🙏 Acknowledgments (ال acknowledgments)](#-acknowledgments-الشكر-والتقدير)
+- [🙏 Acknowledgments (الشكر والتقدير)](#-acknowledgments-الشكر-والتقدير)
 
 ---
 
@@ -72,7 +72,7 @@ WealthWise delivers instant, personalized, data-backed financial guidance (وي�
 | 💬 **AI Chatbot (الشات بوت)** | Bilingual financial guidance assistant "Amjad" (مساعد مالي ثنائي اللغة) | `/chatbot` |
 | 🎯 **Mutual Fund Recommendations (توصيات الصناديق)** | Personalized MF suggestions from risk profile (اقتراحات صناديق حسب المخاطرة) | `/personal-MF` |
 | 🏦 **FD Recommendations (توصيات الودائع)** | Personalized fixed-deposit suggestions (اقتراحات ودائع ثابتة مخصصة) | `/fd-recommendations` |
-| 📤 **Statement Upload (رفع الكشوف)** | Upload bank statements for analysis (رفع كشوفات بنكية للتحليل) | `/fileupload` |
+| 📤 **Statement Upload (رفع الكشوف)** | Upload bank statements to Supabase Storage (رفع كشوفات بنكية لتخزين Supabase) | `/fileupload` |
 | 👤 **Profile & Onboarding (الملف الشخصي)** | Guided financial onboarding form (استبيان مالي موجّه للجديد) | `/foam` |
 
 **UX highlights (لمسات تجربة المستخدم):** fully responsive mobile-first design (تصميم للموبايل أولاً), rich animations with Framer Motion (أنيميشن Framer Motion), Arabic-friendly typography (خطوط عربية), and inline English↔Arabic translations everywhere (ترجمة فورية لكل مصطلح).
@@ -81,30 +81,32 @@ WealthWise delivers instant, personalized, data-backed financial guidance (وي�
 
 ## 🏛 Architecture (البنية المعمارية)
 
+**100% Supabase-native backend (باك إند كامل داخل Supabase)** — no separate server to host or pay for (مفيش سيرفر تاني تفتحه أو تدفع له).
+
 ```
 ┌────────────────────────────────────────────────────────────────────┐
 │  Browser (المتصفح)                                                  │
 │  ┌──────────────────────────────────────────────────────────────┐  │
 │  │  React 18 SPA (CRA) — Tailwind CSS — Framer Motion           │  │
-│  │  Routes: / /home /foam /chatbot /expensedate /personal-MF ... │  │
+│  │  src/api.js → functions/v1/api?endpoint=...                  │  │
 │  └──────────────┬───────────────────────────────┬───────────────┘  │
 └─────────────────┼───────────────────────────────┼──────────────────┘
-                  │ Supabase JS (auth)            │ Axios (business API)
+   Supabase JS auth (JWT)            fetch + user JWT (Authorization)
                   ▼                               ▼
-┌─────────────────────────────┐   ┌──────────────────────────────────┐
-│  Supabase (cloud)           │   │  Express.js Backend              │
-│  • Auth (email + Google)    │   │  • signup / login (JWT session)  │
-│  • Postgres DB              │   │  • findemail / findmail          │
-│  • eu-central-1             │   │  • getAnalysis / getstocks       │
-│  • Project: wealthwise      │   │  • recommend-mutual-funds        │
-└─────────────────────────────┘   │  • fdrecommendations / upload    │
-                                  │  • chatbot4 / submitdata         │
-                                  └──────────────────────────────────┘
-                                            ▲
-                                  Hosted separately (Render/etc.)
+┌─────────────────────────────────────────────────────────────────────┐
+│  Supabase (project: wealthwise, eu-central-1)                       │
+│  ┌───────────────────────┐   ┌──────────────────────────────────┐  │
+│  │  Edge Function: api   │──▶│  Postgres (service role)         │  │
+│  │  (Deno, all routes)   │   │  • profiles (onboarding+count)   │  │
+│  │  signup/login/find*   │   │  • RLS: users read own row       │  │
+│  │  recommendations      │   │  • storage: statements bucket    │  │
+│  │  chatbot4 / upload    │   │    (private uploads)             │  │
+│  └───────────────────────┘   └──────────────────────────────────┘  │
+│  Auth (email + Google OAuth, JWT verification built-in)             │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-> **Note (ملاحظة):** Authentication (signup/login) requires **both** Supabase (identity) and the Express backend (session token + user record) (المصادقة محتاجة Supabase للهوية والباكند لتوكن الجلسة وسجل المستخدم). Analytics & AI features are backend-powered entirely (ميزات التحليل والذكاء الاصطناعي كلها من الباكند).
+> **How it works (إزاي شغال):** the frontend sends its **Supabase JWT** to one Edge Function (`/functions/v1/api?endpoint=...`). The function verifies the JWT, then works with the database using the **service role** key that never leaves Supabase (الواجهة بتبعت توكن Supabase لدالة واحدة، الدالة بتأكد من الهوية وبتشتغل على الداتابيس بمفتاح خدمة مش بيخرج من Supabase أبداً).
 
 ---
 
@@ -113,19 +115,19 @@ WealthWise delivers instant, personalized, data-backed financial guidance (وي�
 | Layer (الطبقة) | Technology (التقنية) | Version |
 |---|---|---|
 | Frontend framework (الواجهة) | React.js (Create React App) | 18.3 |
-| Styling (التنسيق) | Tailwind CSS + custom gradients | 3.4 |
+| Styling (الالتنسيق) | Tailwind CSS + custom gradients | 3.4 |
 | Animations (الأنيميشن) | Framer Motion | 11.x |
 | UI icons (الأيقونات) | lucide-react, react-icons, Font Awesome | — |
 | Charts (الرسوم البيانية) | Recharts | — |
 | Routing (التوجيه) | React Router DOM | 6.28 |
-| Auth & Database (الحساب والقاعدة) | Supabase (Auth + Postgres) | supabase-js 2.49 |
-| HTTP client (طلبات HTTP) | Axios | 1.7 |
-| Sessions (الجلسات) | Cookies (js-cookie) + backend JWT | — |
-| Payload encryption (تشفير البيانات) | CryptoJS (AES) | 4.2 |
+| Auth & Database (الحساب والقاعدة) | Supabase (Auth + Postgres + RLS) | supabase-js 2.49 |
+| **Backend API (الباك إند)** | **Supabase Edge Functions (Deno)** | single `api` function |
+| File storage (تخزين الملفات) | Supabase Storage — private `statements` bucket | — |
+| HTTP client (طلبات HTTP) | Fetch wrapper (`src/api.js`) | — |
+| Sessions (الجلسات) | Supabase JWT + cookie fallback | — |
 | Bot protection (حماية الروبوت) | Google reCAPTCHA v2 (invisible) | 3.1 |
 | Toasts (الإشعارات) | React Toastify | 10.x |
 | Hosting (الاستضافة) | Vercel (static + CI build) | — |
-| Backend API (الباكند) | Express.js (separate service) | — |
 
 ---
 
@@ -134,8 +136,7 @@ WealthWise delivers instant, personalized, data-backed financial guidance (وي�
 ### Prerequisites (المتطلبات)
 
 - **Node.js** 18+ and npm (or yarn)
-- A **Supabase** project (free tier is enough) (مشروع Supabase مجاني يكفي)
-- (Optional for full features) The **Express backend** deployed and reachable (الباكند متاح ومتعمله deploy)
+- A **Supabase** project with the `api` Edge Function deployed (free tier is enough) (مشروع Supabase بدالة `api` متاحة)
 
 ### Installation (التثبيت)
 
@@ -149,7 +150,7 @@ npm install
 
 # 3. Configure environment variables (اضبط متغيرات البيئة)
 cp .env.example .env
-# then edit .env with your values (بعدين املا القيم في ملف .env)
+# then edit .env with your Supabase URL + anon key (بعدين املا بيانات Supabase)
 
 # 4. Run the development server (شغّل سيرفر التطوير)
 npm start
@@ -165,67 +166,72 @@ Create `.env` in the project root (انشئ ملف `.env` في جذر المشر
 |---|---|---|---|
 | `REACT_APP_SUPABASE_URL` | ✅ Always | Supabase project URL (رابط مشروع Supabase) | ✅ Set on Vercel |
 | `REACT_APP_SUPABASE_ANON_KEY` | ✅ Always | Supabase anon/publishable key (المفتاح العام) | ✅ Set on Vercel |
-| `REACT_APP_BACKEND_URL` | ✅ For auth & features | Express backend base URL ending with `/` (رابط الباكند ينتهي بـ `/`) | ⏳ Pending backend |
-| `REACT_APP_SECRET` | ✅ With backend | AES secret shared with backend for login payload encryption (سر التشفير — نفس القيمة في الباكند) | ⏳ Pending backend |
-| `REACT_APP_SITEKEY` | ✅ With reCAPTCHA | Google reCAPTCHA site key (مفتاح reCAPTCHA) | ⏳ Confirm key |
+| `REACT_APP_SITEKEY` | Optional | Google reCAPTCHA site key (مفتاح reCAPTCHA) | Optional |
 
-> ⚠️ **CRA rule (قاعدة CRA):** Only `REACT_APP_*` variables are exposed to the browser (متغيّرات `REACT_APP_*` بس اللي بتروح للمتصفح). Never put real secrets (DB passwords, service keys) here (متحطش أسرار حقيقية هنا أبداً) — those belong server-side (الأسرار الحقيقية في الباكند).
+That's it — **no backend URL, no secrets** (بس كده — مفيش رابط باكند ومفيش أسرار). Everything else lives inside Supabase (كل حاجة تانية جوه Supabase).
+
+> ⚠️ **CRA rule (قاعدة CRA):** Only `REACT_APP_*` variables are exposed to the browser (متغيّرات `REACT_APP_*` بس اللي بتروح للمتصفح). The service-role key and DB credentials stay server-side in Supabase (مفاتيح الخدمة بتفضل جوه Supabase).
 
 ### Build & Test (البناء والاختبار)
 
 ```bash
-npm run build        # production build (بناء الإنتاج)
+npm run build         # production build (بناء الإنتاج)
 CI=true npm run build # fail on any ESLint warning — same as Vercel (نفس شروط Vercel)
-npm test             # run test suite (تشغيل الاختبارات)
+npm test              # run test suite (تشغيل الاختبارات)
 ```
 
 ---
 
 ## 🔐 Authentication (المصادقة)
 
-WealthWise uses a **dual-layer auth model (نموذج مصادقة مزدوج)**:
+Authentication is fully handled by **Supabase Auth (المصادقة كلها عبر Supabase Auth)**:
 
-1. **Supabase Auth (حساب Supabase)** — identity provider (مزود الهوية):
-   - Email & password signup/login/signup (تسجيل ودخول بالبريد والباسورد)
-   - Email confirmation flow (تأكيد البريد — configurable in Supabase dashboard)
-   - Google OAuth popup flow (تسجيل دخول جوجل)
-   - Password reset via email (استعادة كلمة المرور)
-2. **Express backend session (جلسة الباكند)** — business layer (طبقة الأعمال):
-   - `/signup` — create backend user record (إنشاء سجل المستخدم)
-   - `/login` — issue signed session token → `sessionToken` cookie, 8h expiry (إصدار توكن جلسة مدته ٨ ساعات)
-   - `/findemail` — first-run detection: new users land on onboarding `/foam`, returning users on `/home` (تحديد المستخدم الجديد)
+- **Email & password** signup/login with email-confirmation support (تسجيل ودخول بالبريد مع دعم تأكيد البريد)
+- **Google OAuth** popup flow (تسجيل دخول جوجل)
+- **Password reset** via email (استعادة كلمة المرور بالبريد)
 
-**Auth flow (تدفق المصادقة):**
+Login flow (تدفق الدخول):
 
 ```
-Login form → Supabase signInWithPassword ✅
-           → Backend /login (AES-encrypted payload) → sessionToken cookie
-           → Backend /findemail → /foam (new) or /home (returning)
+Sign in with Supabase ✅
+  → POST /functions/v1/api?endpoint=login   (JWT verified by the function)
+  → { token } — stored as sessionToken cookie (8h)
+  → GET  ...?endpoint=findemail&email=...
+  → count === 0 ? /foam (onboarding) : /home (returning user)
 ```
+
+The Edge Function verifies every request's JWT and derives the user's email from it — users can only touch **their own** row in `profiles` (الدالة بتحقق التوكن وبتستخدم إيميل المستخدم نفسه — المستخدم مش هيوصل لبيانات حد تاني بسبب RLS كمان).
 
 ---
 
-## 🔌 Backend API (واجهة الـ API الخلفية)
+## 🔌 Backend API — Supabase Edge Functions (الواجهة الخلفية)
 
-The frontend consumes the following backend endpoints (الواجهة بتستخدم نقاط الـ API دي):
+One function, `api`, routes every endpoint via `?endpoint=<name>` (دالة واحدة بتوزع على كل النقاط):
 
-| Method | Endpoint | Used by (بيستخدمها فين) |
+| Endpoint | Method | Purpose (الغرض) |
 |---|---|---|
-| POST | `/signup` | signup + Google OAuth (التسجيل وجوجل) |
-| POST | `/login` | email login (دخول البريد) |
-| GET | `/findmail` | pre-login user check (فحص المستخدم قبل الدخول) |
-| GET | `/findemail` | route new vs. returning users (تحديد مسار المستخدم) |
-| POST | `/submitdata` | onboarding form (استبيان البداية) |
-| POST | `/updatecount` | onboarding counter (عدّاد الاستبيان) |
-| POST | `/getAnalysis` | expense benchmarking (مقارنة المصروفات) |
-| POST | `/getstocks` | portfolio stocks (أسهم المحفظة) |
-| POST | `/portfolio-profit-loss` | P&L report (تقرير الأرباح) |
-| POST | `/recommend-mutual-funds` | MF recommendations (توصيات الصناديق) |
-| POST | `/fdrecommendations` | FD recommendations (توصيات الودائع) |
-| POST | `/chatbot4` | AI chatbot replies (ردود الشات بوت) |
-| POST | `/upload` | statement upload (رفع الكشوفات) |
+| `signup` | POST | Upsert profile row after signup (إنشاء سجل المستخدم) |
+| `login` | POST | Issue session token for cookie (إصدار توكن الجلسة) |
+| `findmail` | GET | Pre-login user check (فحص المستخدم قبل الدخول) |
+| `findemail` | GET | New vs. returning user routing + navbar profile (تحديد مسار المستخدم والملف) |
+| `submitdata` | POST | Onboarding form → `profiles.form_data` (حفظ استبيان البداية) |
+| `updatecount` | POST | Increment onboarding count (زيادة عدّاد الاستبيان) |
+| `recommend-mutual-funds` | POST | MF recommendations → `{ groqRecommendation }` (توصيات الصناديق) |
+| `fdrecommendations` | POST | FD recommendations → `{ groqRecommendation }` (توصيات الودائع) |
+| `chatbot4` | POST | Bilingual financial chatbot → `{ answer }` (الشات بوت المالي) |
+| `upload` | POST | Multipart CSV → `statements` bucket (رفع ملف CSV) |
 
-> 🔑 **Session security (أمان الجلسة):** every backend call sends `Authorization: Bearer <sessionToken>` + `withCredentials: true` (كل طلب للباكند بيبعت توكن الجلسة). CORS on the backend must allow the Vercel origin (لازم الباكند يسمح بدومين Vercel).
+**Database tables (جداول الداتابيس):**
+
+- `public.profiles` — `email` (PK), `name`, `phone`, `profile`, `count`, `form_data` (jsonb), `created_at`
+  - **RLS enabled:** users can only SELECT their own row (active RLS: كل مستخدم يشوف سجله هو بس)
+- `storage.statements` — private bucket for uploaded statements (بكت خاص للكشوفات المرفوعة)
+
+**Deploying the function locally (نشر الدالة محلياً):**
+
+```bash
+supabase functions deploy api --project-ref gheeanugjsiuxkegkhxx
+```
 
 ---
 
@@ -236,8 +242,8 @@ The frontend consumes the following backend endpoints (الواجهة بتستخ
 | Piece (الجزء) | Service (الخدمة) | URL |
 |---|---|---|
 | Frontend (الواجهة) | Vercel — auto-deploy on push to `main` | https://wealthwise-frontend-kappa.vercel.app |
-| Auth + DB (الحساب والقاعدة) | Supabase — project `wealthwise`, region `eu-central-1` | https://supabase.com |
-| Backend API (الباكند) | Separate Express service (deployment pending) | ⏳ |
+| Auth + DB + API (الحساب والقاعدة والواجهة) | Supabase — project `wealthwise`, region `eu-central-1` | Edge Function: `/functions/v1/api` |
+| Storage (التخزين) | Supabase Storage — bucket `statements` (private) | — |
 
 ### Deploying Changes (نشر التغييرات)
 
@@ -245,18 +251,11 @@ The Vercel project is connected to GitHub — every push to `main` triggers a pr
 
 ```bash
 git add . && git commit -m "feat: my change" && git push origin main
-# Vercel builds automatically (Vercel هيبني أوتوماتيك)
-# Then update env vars if needed via Vercel dashboard (و حدّث متغيرات البيئة لو لزم)
+# Frontend auto-deploys (الواجهة تتنشر أوتوماتيك)
+# Edge function changes: supabase functions deploy api (تغيّرات الدالة: اعمل deploy للدالة)
 ```
 
 > ⚠️ **CI behavior (سلوك الـ CI):** Vercel builds with `CI=true`, so **any ESLint warning fails the build** (أي تحذير ESLint بيرفض البناء). Keep the code lint-clean: run `npx eslint "src/**/*.{js,jsx}"` before pushing (شغّل فحص الـ lint قبل كل push).
-
-### Manual Deploy (نشر يدوي)
-
-```bash
-npm install -g vercel
-vercel --prod
-```
 
 ---
 
@@ -270,12 +269,12 @@ Status of each production component (حالة كل مكوّن في الإنتا�
 | 2 | ESLint/CI clean (نظافة البناء) | ✅ Done | 0 errors, 0 warnings |
 | 3 | Supabase project (مشروع Supabase) | ✅ Live | `wealthwise`, eu-central-1 |
 | 4 | Supabase env vars on Vercel | ✅ Set | URL + anon key (all environments) |
-| 5 | Email/password signup & login | ⚙️ Ready | Works once backend is live (item 6) |
-| 6 | **Express backend deployed** (نشر الباكند) | ⏳ **Needed** | Required for signup/login/analytics |
-| 7 | `REACT_APP_BACKEND_URL` + `REACT_APP_SECRET` | ⏳ **Needed** | Set on Vercel once backend is live |
-| 8 | Google OAuth provider (مزود جوجل) | ⏳ **Needed** | Google Cloud Client ID + Secret in Supabase |
-| 9 | Email confirmations config (إعداد تأكيد البريد) | ⏳ Decide | On (default) or off in Supabase dashboard |
-| 10 | reCAPTCHA site key (مفتاح reCAPTCHA) | ⏳ Confirm | Reuse current key or provide new one |
+| 5 | Backend (Edge Function `api`) | ✅ Deployed | All 10 endpoints inside Supabase |
+| 6 | DB schema + RLS (`profiles`) | ✅ Done | Users read only their own row |
+| 7 | Storage bucket (`statements`) | ✅ Done | Private — uploads via the function |
+| 8 | Email/password signup & login | ✅ Ready | Works with Supabase Auth |
+| 9 | Google OAuth provider (مزود جوجل) | ⏳ Optional | Needs Google Cloud Client ID + Secret in Supabase |
+| 10 | Email confirmations config (إعداد تأكيد البريد) | ⏳ Decide | On (default) or off in Supabase dashboard |
 | 11 | Custom domain (دومين مخصص) | ⏳ Optional | Add via Vercel dashboard |
 
 ---
@@ -287,11 +286,16 @@ wealthwise-frontend/
 ├── public/
 │   ├── index.html            # HTML shell, reCAPTCHA script, CDNs (القالب الأساسي)
 │   └── manifest.json         # PWA manifest (بيانات التطبيق)
+├── supabase/
+│   └── functions/
+│       └── api/
+│           └── index.ts      # The whole backend: 10 endpoints (الباك إند كله: ١٠ نقاط)
 ├── src/
 │   ├── index.js              # React root + Router (جذر React والراوتر)
 │   ├── App.js                # Routes + auth state listener (المسارات وحالة المصادقة)
-│   ├── App.css / index.css   # Base styles + Tailwind directives (التنسيقات الأساسية)
+│   ├── api.js                # Edge Function fetch client (عميل استدعاء الدالة)
 │   ├── supabase.js           # Supabase client init (إعداد عميل Supabase)
+│   ├── App.css / index.css   # Base styles + Tailwind directives (التنسيقات الأساسية)
 │   ├── setupTests.js         # Jest/dom test setup (إعداد الاختبارات)
 │   └── components/
 │       ├── login.js          # Signup / login / reset / Google OAuth (الدخول والتسجيل)
@@ -317,11 +321,12 @@ wealthwise-frontend/
 
 ## 🔒 Security Notes (ملاحظات الأمان)
 
-- ✅ The **anon key is public by design** (المفتاح العام مفتوح بطبيعته) — it only permits what Supabase RLS policies allow (بيسمح بس بالقواعد اللي محددة في RLS).
-- ✅ Login payloads are **AES-encrypted** client-side with `REACT_APP_SECRET` before hitting the backend (بيانات الدخول بتتشفير قبل الباكند).
+- ✅ The **anon key is public by design** (المفتاح العام مفتوح بطبيعته) — the Edge Function verifies the caller's JWT on every request (الدالة بتحقق توكن المستخدم في كل طلب).
+- ✅ The **service role key never reaches the browser** — it lives only in Supabase's function runtime (مفتاح الخدمة مش بيخرج من Supabase أبداً).
+- ✅ **RLS on `profiles`** — users can only read their own row (كل مستخدم يشوف سجله هو بس).
+- ✅ Uploads go to a **private storage bucket** through the function only (الرفع في بكت خاص عن طريق الدالة بس).
 - ✅ Session cookie is `Secure` + `SameSite=Strict`, 8-hour expiry (كوكيز الجلسة آمنة ومدة ٨ ساعات).
-- ✅ reCAPTCHA invisible mode protects auth forms (حماية reCAPTCHA لفورمات الحساب).
-- 🔜 Harden further: enable **RLS on every table** (فعّل RLS على كل الجداول), rotate secrets regularly (بدّل الأسرار دورياً), and add rate limiting on the backend (أضف حد للطلبات في الباكند).
+- 🔜 Harden further: add rate limiting via Supabase WAF (أضف حد للطلبات عبر WAF), rotate keys regularly (بدّل المفاتيح دورياً).
 
 ---
 
@@ -351,7 +356,7 @@ wealthwise-frontend/
 
 ## 🙏 Acknowledgments (الشكر والتقدير)
 
-- [Supabase](https://supabase.com) — auth & database (المصادقة وقواعد البيانات)
+- [Supabase](https://supabase.com) — auth, database, Edge Functions & storage (المصادقة والقواعد والدوال والتخزين)
 - [Vercel](https://vercel.com) — hosting & CI (الاستضافة والبناء التلقائي)
 - [React](https://react.dev), [Tailwind CSS](https://tailwindcss.com), [Framer Motion](https://www.framer.com/motion/) — the frontend toolkit
 - Arabic financial-education creators on YouTube (صنّاع المحتوى المالي العربي على يوتيوب) whose free lessons power the Learning Center (دروسهم بتغذّي مركز التعلم)

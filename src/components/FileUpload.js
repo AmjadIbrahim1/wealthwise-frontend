@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import Cookies from 'js-cookie';
+import { api } from '../api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Upload, FileText, X } from 'lucide-react';
@@ -37,14 +36,7 @@ const FileUpload = ({mail}) => {
         setUploading(true);
 
         try {
-            const getCookie = Cookies.get('sessionToken');
-            const response = await axios.post(process.env.REACT_APP_BACKEND_URL + "upload", formData, {
-                headers: {
-                    Authorization: `Bearer ${getCookie}`,
-                    "Content-Type": "multipart/form-data",
-                },
-                withCredentials: true,
-            });
+            const response = await api('upload', { body: formData });
             
             toast.success(response.data.message || "File uploaded successfully! (تم رفع الملف بنجاح!)");
             setFile(null);

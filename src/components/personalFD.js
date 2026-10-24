@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import axios from 'axios';
+import { api } from '../api';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { 
     CalendarDays, 
@@ -8,7 +8,6 @@ import {
     ArrowUp, 
     Building2 
 } from 'lucide-react';
-import Cookies from 'js-cookie';
 import Navbar from './navbar';
 
 const PersonalFDRecommendation = ({mail}) => {
@@ -53,18 +52,7 @@ const PersonalFDRecommendation = ({mail}) => {
         setRecommendation(null);
 
         try {
-            const getCookie = Cookies.get('sessionToken');
-            const response = await axios.post(
-                `${process.env.REACT_APP_BACKEND_URL}fdrecommendations`, 
-                formData,
-                {
-                    headers: {
-                      Authorization: `Bearer ${getCookie}`,
-                      'Content-Type': 'application/json',
-                    },
-                    withCredentials: true,
-                }
-            );
+            const response = await api('fdrecommendations', { body: formData });
             setRecommendation(response.data);
             
             setTimeout(() => {

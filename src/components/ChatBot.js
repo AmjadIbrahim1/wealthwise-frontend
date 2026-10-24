@@ -2,8 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, X, BadgeDollarSign } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import Cookies from 'js-cookie';
+import { api } from '../api';
 
 const ChatBot = ({ mail }) => {
   const navigate = useNavigate();
@@ -54,18 +53,7 @@ const ChatBot = ({ mail }) => {
     setIsLoading(true);
 
     try {
-      const sessionToken = Cookies.get('sessionToken');
-      const response = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}chatbot4`,
-        { question: input },
-        {
-          headers: {
-            Authorization: `Bearer ${sessionToken}`,
-            'Content-Type': 'application/json',
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await api('chatbot4', { body: { question: input } });
 
       const chatBotMessage = {
         id: messages.length +2,

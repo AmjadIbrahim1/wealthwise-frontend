@@ -1,8 +1,7 @@
 import React, { useState, useRef } from 'react';
-import axios from 'axios';
+import { api } from '../api';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { Users, TrendingUp, Wallet, Coins, ChevronRight, ArrowUp } from 'lucide-react';
-import Cookies from 'js-cookie';
 import Navbar from './navbar';
 
 const InvestmentRecommendationForm = ({mail}) => {
@@ -48,18 +47,7 @@ const InvestmentRecommendationForm = ({mail}) => {
         setRecommendation(null);
 
         try {
-            const getCookie = Cookies.get('sessionToken');
-            const response = await axios.post(
-                `${process.env.REACT_APP_BACKEND_URL}recommend-mutual-funds`, 
-                formData,
-                {
-                    headers: {
-                      Authorization: `Bearer ${getCookie}`,
-                      'Content-Type': 'application/json',
-                    },
-                    withCredentials: true,
-                  }
-            );
+            const response = await api('recommend-mutual-funds', { body: formData });
             setRecommendation(response.data);
             
             setTimeout(() => {
