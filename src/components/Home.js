@@ -1,12 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Send } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import "font-awesome/css/font-awesome.min.css";
 import Navbar from "./navbar.js";
 import { useNavigate } from "react-router-dom";
 
 function extractVideoId(url) {
-  const regex = /(?:https?:\/\/(?:www\.)?youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|(?:https?:\/\/(?:www\.)?youtu\.be\/))([a-zA-Z0-9_-]{11})/;
+  const regex = /(?:https?:\/\/(?:www\.)?youtube\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|(?:https?:\/\/(?:www\.)?youtu\.be\/))([a-zA-Z0-9_-]{11})/;
   const match = url.match(regex);
   if (match && match[1]) {
     return match[1];
@@ -75,21 +74,21 @@ async function fetchYouTubeVideoDetails(link) {
   }
 }
 
+// فيديوهات عربية مصرية للتوعية المالية (Arabic Egyptian financial awareness videos)
+const videoLinks = [
+  "https://www.youtube.com/watch?v=KBa2Oeg7PNI",
+  "https://www.youtube.com/watch?v=F0iZJmkUugw",
+  "https://www.youtube.com/watch?v=NkXRF7VZuJU",
+  "https://www.youtube.com/watch?v=esELlZdie6k",
+  "https://www.youtube.com/watch?v=O2vFMxoAQ2c",
+  "https://www.youtube.com/watch?v=Cz4u3bTSL8w",
+  "https://www.youtube.com/watch?v=CyY88hTJ_JI",
+];
+
 const Home = ({ mail }) => {
   const [egxData, setEgxData] = useState([]);
 
   const [videoDetails, setVideoDetails] = useState([]);
-
-  // فيديوهات عربية مصرية للتوعية المالية (Arabic Egyptian financial awareness videos)
-  const videoLinks = [
-    "https://www.youtube.com/watch?v=KBa2Oeg7PNI",
-    "https://www.youtube.com/watch?v=F0iZJmkUugw",
-    "https://www.youtube.com/watch?v=NkXRF7VZuJU",
-    "https://www.youtube.com/watch?v=esELlZdie6k",
-    "https://www.youtube.com/watch?v=O2vFMxoAQ2c",
-    "https://www.youtube.com/watch?v=Cz4u3bTSL8w",
-    "https://www.youtube.com/watch?v=CyY88hTJ_JI",
-  ];
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -105,32 +104,6 @@ const Home = ({ mail }) => {
 
     fetchVideos();
   }, []);
-
-  const [messages, setMessages] = useState([
-    { role: "assistant", content: "Hello! How can I assist you today? (أهلاً! أقدر أساعدك إزاي النهارده؟)" },
-  ]);
-  const [input, setInput] = useState("");
-
-  const handleSendMessage = () => {
-    if (input.trim() === "") return;
-
-    const userMessage = { role: "user", content: input.trim() };
-    setMessages((prev) => [...prev, userMessage]);
-
-    const assistantMessage = {
-      role: "assistant",
-      content: `You said (انت قلت): "${input.trim()}"`,
-    };
-    setTimeout(() => {
-      setMessages((prev) => [...prev, assistantMessage]);
-    }, 500);
-
-    setInput("");
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") handleSendMessage();
-  };
 
   const fetchData = async () => {
     // بيانات البورصة المصرية EGX (Egyptian Exchange - EGX data)
@@ -386,7 +359,6 @@ const Home = ({ mail }) => {
         ],
       },
     ];
-    const stockImages = {};
 
     return (
       <div
@@ -619,64 +591,6 @@ const Home = ({ mail }) => {
         ))}
       </div>
     );
-  };
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [isChatbotVisible, setIsChatbotVisible] = useState(false);
-  const messagesEndRef = useRef(null);
-
-  const generateFinancialResponse = (userInput) => {
-    const lowercaseInput = userInput.toLowerCase();
-
-    if (lowercaseInput.includes("invest")) {
-      return "Great question (سؤال ممتاز)! Consider diversifying your portfolio across different asset classes (فكّر توزّع محفظتك على أصول مختلفة). Index funds and ETFs can be good starting points for most investors (صناديق المؤشرات و ETFs ممكن تكون نقطة بداية كويسة لأغلب المستثمرين).";
-    } else if (lowercaseInput.includes("savings")) {
-      return "For savings (بالنسبة للادخار), aim to build an emergency fund covering 3-6 months of expenses (حاول تعمل صندوق طوارئ يغطي 3-6 شهور مصروفات). Look into high-yield savings accounts to earn better interest (شوف حسابات ادخار بفائدة أعلى عشان تكسب أحسن).";
-    } else if (lowercaseInput.includes("retirement")) {
-      return "For retirement planning (لتخطيط المعاش), maximize contributions to tax-advantaged accounts like 401(k) and IRAs (زود إيداعاتك في حسابات الاعفاء الضريبي). The earlier you start, the more you can benefit from compound interest (كل ما تبدأ بدري هتستفيد أكتر من الفائدة المركبة).";
-    } else if (lowercaseInput.includes("debt")) {
-      return "When managing debt (لإدارة الديون), prioritize high-interest debt first (ابدأ بالدين اللي عليه فائدة عالية الأول). Consider the debt avalanche method: pay minimums on all debts, then put extra money towards the highest interest debt (جرّب طريقة السيول: ادفع الأدنى في كل الديون وبعدين حوّل الفلوس الزايدة لأعلى فائدة).";
-    } else {
-      return "I can help with investment, savings, retirement, and debt questions (أقدر أساعدك في الاستثمار والادخار والمعاش والديون). What specific financial advice are you looking for (إيه النصيحة المالية اللي بتدور عليها بالظبط؟)";
-    }
-  };
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-
-    const userMessage = {
-      id: messages.length,
-      text: input,
-      sender: "user",
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
-    setIsLoading(true);
-
-    setTimeout(() => {
-      const botResponse = {
-        id: messages.length + 1,
-        text: generateFinancialResponse(input),
-        sender: "bot",
-      };
-
-      setMessages((prev) => [...prev, botResponse]);
-      setIsLoading(false);
-    }, 1000);
-  };
-
-  const toggleChatbot = () => {
-    setIsChatbotVisible((prev) => !prev);
   };
 
   return (

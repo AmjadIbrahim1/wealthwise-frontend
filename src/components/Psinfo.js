@@ -135,7 +135,7 @@ const Psinfo = ({ mail }) => {
       setColors("#339933");
       navigate('/home');
     }
-  }, [formSubmitted, timer]);
+  }, [formSubmitted, timer, navigate]);
 
   
   const nextStep = () => {

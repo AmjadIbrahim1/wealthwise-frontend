@@ -1,5 +1,5 @@
 import React, { useState,useRef,useEffect } from 'react';
-import {  Mail, ChevronLeft, Eye, EyeOff, User, Lock, AlertCircle, AlignCenter } from 'lucide-react';
+import {  Mail, Eye, EyeOff, User, Lock, AlertCircle } from 'lucide-react';
 import '../index.css';
 import { supabase } from "../supabase";
 import { ToastContainer, toast } from 'react-toastify';
@@ -82,9 +82,7 @@ const StockMarketPattern = React.memo(() => (
 
 const Login = (log) => {
   const [isLogin, setIsLogin] = useState(true);
-  const logoutTimerRef = useRef(null); 
-
-  const [recaptchaToken, setRecaptchaToken] = useState(null);
+  const [, setRecaptchaToken] = useState(null);
   const recaptchaRef = useRef();
   const siteKey = process.env.REACT_APP_SITEKEY;
 
@@ -124,9 +122,9 @@ const Login = (log) => {
   const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [token, settoken] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [, setIsLoggedIn] = useState(false);
+  const [, settoken] = useState(null);
+  const [, setLoading] = useState(false);
 
   const [shouldHaveRainbowEffect,setshouldHaveRainbowEffect]= useState(false);
 
@@ -438,41 +436,10 @@ const Login = (log) => {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      setIsLoggedIn(false);
-      // googleuser1(false);
-      settoken(null);
-      toast.dismiss()
-
-      toast.success('Logout successful! (تم تسجيل الخروج بنجاح!)');
-      recaptchaRef.current.reset();
-      if (logoutTimerRef.current) {
-        clearTimeout(logoutTimerRef.current); 
-      }
-
-      if (logoutTimerRef.current) {
-        clearTimeout(logoutTimerRef.current);
-        logoutTimerRef.current = null; 
-      }
-
-    } catch (error) {
-      console.error(error);
-      toast.dismiss()
-      recaptchaRef.current.reset();
-      toast.error('Error occurred during logout. Please try again. (حصل مشكلة أثناء الخروج، جرّب تاني.)');
-     
-      
-    }
-  };
-
-
   useEffect(() => {
     const handleSignOut = async () => {
       try {
         await supabase.auth.signOut();
-        navigate('/', { replace: true });
         setIsLoggedIn(false);
       } catch (error) {
         console.error('Error signing out:', error);
@@ -566,7 +533,7 @@ const Login = (log) => {
       const user1 = { email: user.email, password : null, phone : user.phone || null, name : user.user_metadata?.full_name || user.user_metadata?.name || null,profile : user.user_metadata?.avatar_url || null};
       const getCookie = Cookies.get('sessionToken');
       try{
-        const response1 = await axios.post(
+        await axios.post(
           process.env.REACT_APP_BACKEND_URL + "signup",
           user1,
           {
@@ -729,13 +696,6 @@ const Login = (log) => {
       pauseOnHover
     />    
     <div className="min-h-screen relative bg-gradient-to-br from-blue-900 to-purple-900 flex flex-col items-center xl:items-end justify-center xl:pr-12  p-5 overflow-hidden">
-    // <style>
-    //     {`
-    //       .grecaptcha-badge {
-    //         visibility: hidden;
-    //       }
-    //     `}
-    //   </style>
 
       <ReCAPTCHA
           ref={recaptchaRef} 

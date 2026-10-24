@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUpIcon, TrendingDownIcon } from 'lucide-react';
@@ -8,13 +8,16 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const ExpenseComparison = ({ data, mail, props }) => {
-  const [analysisdata, setAnalysisdata] = useState(null);
   const [averageExpenses, setAverageExpenses] = useState({});
-  const [userExpenses, setUserExpenses] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  const fetchData = async (expenses) => {
+  const propsRef = useRef(props);
+  useEffect(() => {
+    propsRef.current = props;
+  });
+
+  const fetchData = useCallback(async (expenses) => {
     try {
       setIsLoading(true);
       const getCookie = Cookies.get('sessionToken');
@@ -39,8 +42,7 @@ const ExpenseComparison = ({ data, mail, props }) => {
           withCredentials: true,
         }
       );
-      setAnalysisdata(resdata.data.resopnse);
-      props(resdata.data.resopnse);
+      propsRef.current(resdata.data.resopnse);
 
       // Set average expenses after fetching analysis data
       const report = resdata.data.resopnse.report.expensesComparison;
@@ -66,7 +68,7 @@ const ExpenseComparison = ({ data, mail, props }) => {
       console.error('Error fetching data:', error);
       setIsLoading(false);
     }
-  };
+  }, [data, navigate]);
 
   useEffect(() => {
     if (data) {
@@ -86,10 +88,9 @@ const ExpenseComparison = ({ data, mail, props }) => {
         personalFinanceAndPensions: parseInt(data.personalfinance, 10),
         savings: parseInt(data.savings, 10),
       };
-      setUserExpenses(expenses);
       fetchData(expenses);
     }
-  }, [data]);
+  }, [data, fetchData]);
 
   const [selectedCategory, setSelectedCategory] = useState(null);
 

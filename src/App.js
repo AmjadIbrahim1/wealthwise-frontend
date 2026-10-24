@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route ,useNavigate} from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Login from './components/login';
 import Home from './components/Home';
 import { supabase } from "./supabase";
 import { motion } from 'framer-motion';
 import { Coins, TrendingUp, Wallet, Users } from 'lucide-react';
-import HashLoader from "react-spinners/HashLoader";
 import Psinfo from './components/Psinfo';
 import ChatBot from './components/ChatBot';
 import FileUpload from './components/FileUpload';
@@ -15,11 +14,9 @@ import PersonalFDRecommendation from './components/personalFD';
 import ExpenseDate from './components/ExpenseDate';
 
 const App = () => {
-  const [log, setLog] = useState(false);
+  const [, setLog] = useState(false);
   const [mail, setMail] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const navigate = useNavigate();
 
   const containerVariants = {
         hidden: { opacity: 0 },
@@ -135,7 +132,6 @@ const App = () => {
                     {iconList.map((item, index) => (
                         <motion.div
                             key={index}
-                            variants={itemVariants}
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             variants={spinVariants}

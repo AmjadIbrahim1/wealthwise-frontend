@@ -1,13 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Home, 
-  Layout, 
   Settings, 
-  Bell, 
-  Search, 
   Activity,
-  X,
-  LogOut
+  X
 } from 'lucide-react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
@@ -16,15 +12,13 @@ import { useNavigate } from 'react-router-dom';
 const Navbar = ({mail}) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('home');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchActive, setIsSearchActive] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [data, setData] = useState({});
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
  
 
-  const handleProfile = async (e) => {
+  const handleProfile = useCallback(async (e) => {
     try {
       const getCookie = Cookies.get('sessionToken');
       const response = await axios.get(
@@ -41,13 +35,13 @@ const Navbar = ({mail}) => {
     } catch (error) {
       console.error('Error fetching recommendation:', error);
     }
-  }
+  }, [mail]);
 
   useEffect(() => {
     if(mail){
       handleProfile()
     }
-  },[mail])
+  },[mail, handleProfile])
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 

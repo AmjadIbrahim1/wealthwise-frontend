@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import axios from 'axios';
-import { motion, useScroll, useSpring, useTransform } from 'framer-motion';
+import { motion, useScroll, useSpring } from 'framer-motion';
 import { Users, TrendingUp, Wallet, Coins, ChevronRight, ArrowUp } from 'lucide-react';
 import Cookies from 'js-cookie';
 import Navbar from './navbar';
