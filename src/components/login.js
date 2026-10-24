@@ -219,7 +219,7 @@ const Login = (log) => {
   };
 
 
-  const signUp = async (email, password, phone, name) => {
+  const signUp = async (email, password, name, phone) => {
     try {
 
       toast(
@@ -249,7 +249,7 @@ const Login = (log) => {
           className: 'custom-toast',
         }
       );
-      const user1 = { email: email, phone : name, name : phone};
+      const user1 = { email, name, phone };
       const response = await api('signup', { body: user1 });
   
       if (response) {
@@ -258,6 +258,9 @@ const Login = (log) => {
           password,
           options: {
             data: { name, phone },
+            // Sends the user back to this origin when they confirm their email,
+            // so signup works on the production domain and not just the Site URL.
+            emailRedirectTo: window.location.origin,
           },
         });
         if (signUpError) throw signUpError;
@@ -375,7 +378,11 @@ const Login = (log) => {
       setLoading(false);
       settoken(null);
       toast.dismiss()
-      toast.error('Invalid email or password. If You are a New User Please Signup (البريد أو كلمة المرور غلط. لو جديد اعمل حساب الأول)');
+      if (error.message && error.message.toLowerCase().includes('not confirm')) {
+        toast.error('Email not verified. Please check your inbox and confirm your email first. (الإيميل متفعّلش. افحص برجك وفعّله الأول)');
+      } else {
+        toast.error('Invalid email or password. If You are a New User Please Signup (البريد أو كلمة المرور غلط. لو جديد اعمل حساب الأول)');
+      }
       recaptchaRef.current.reset();
       setshouldHaveRainbowEffect(true);
 
